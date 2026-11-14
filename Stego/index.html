@@ -112,20 +112,28 @@
 	};
 </script>
 <script>
-  // Проверяем, были ли уже нарушения до этого
+  // Считываем количество нарушений из памяти браузера
   let warningCount = parseInt(localStorage.getItem('test_warnings') || '0');
   const maxWarnings = 1; // Допустимое количество уходов
 
+  // ПРОВЕРКА ПРИ ЗАГРУЗКЕ: если лимит уже был исчерпан ранее, блокируем сразу!
+  if (warningCount > maxWarnings) {
+    document.addEventListener("DOMContentLoaded", function() {
+      document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:30vh; font-family:sans-serif;'>Лимит нарушений исчерпан! Тест аннулирован. Доступ заблокирован.</h1>";
+    });
+  }
+
+  // Отслеживание ухода со страницы во время теста
   document.addEventListener("visibilitychange", function() {
     if (document.hidden) {
       warningCount++;
-      // Сохраняем новое количество нарушений в память браузера
+      // Сохраняем новое значение в память
       localStorage.setItem('test_warnings', warningCount);
       
       if (warningCount <= maxWarnings) {
         alert("ВНИМАНИЕ! Вы покинули страницу теста. Это предупреждение № " + warningCount);
       } else {
-        // Полностью стираем тест и блокируем экран
+        // Стираем тест и блокируем экран
         document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:30vh; font-family:sans-serif;'>Лимит нарушений исчерпан! Тест аннулирован.</h1>";
       }
     }
