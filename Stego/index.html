@@ -112,18 +112,21 @@
 	};
 </script>
 <script>
-  let warningCount = 0;
-  const maxWarnings = 1; // Если хотите дать 1 предупреждение, а на 2-й уход закрыть тест
+  // Проверяем, были ли уже нарушения до этого
+  let warningCount = parseInt(localStorage.getItem('test_warnings') || '0');
+  const maxWarnings = 1; // Допустимое количество уходов
 
   document.addEventListener("visibilitychange", function() {
     if (document.hidden) {
       warningCount++;
+      // Сохраняем новое количество нарушений в память браузера
+      localStorage.setItem('test_warnings', warningCount);
       
       if (warningCount <= maxWarnings) {
-        alert("ВНИМАНИЕ! Вы покинули страницу теста. Попытка зафиксирована!");
+        alert("ВНИМАНИЕ! Вы покинули страницу теста. Это предупреждение № " + warningCount);
       } else {
-        // Полностью стираем плеер iSpring и показываем надпись об аннулировании
-        document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:30vh; font-family:sans-serif;'>Тест аннулирован из-за переключения вкладки или сворачивания браузера!</h1>";
+        // Полностью стираем тест и блокируем экран
+        document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:30vh; font-family:sans-serif;'>Лимит нарушений исчерпан! Тест аннулирован.</h1>";
       }
     }
   });
