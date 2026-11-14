@@ -112,23 +112,52 @@
 	};
 </script>
 <script>
-  // Проверяем, были ли уже нарушения до этого
-  let warningCount = parseInt(localStorage.getItem('test_warnings') || '0');
-  const maxWarnings = 1; // Допустимое количество уходов
+  // === 1. НАСТРОЙКА ВРЕМЕНИ ДОСТУПА ===
+  // Месяцы считаются от 0 до 11 (0 = январь, 9 = октябрь, 10 = ноябрь, 11 = декабрь)
+  // Формат: new Date(Год, Месяц, День, Часы, Минуты)
+  const startTime = new Date(2026, 10, 20, 9, 0);   // Например: 20 ноября 2026 года в 09:00
+  const endTime   = new Date(2026, 10, 20, 11, 30); // Например: 20 ноября 2026 года в 11:30
 
-  document.addEventListener("visibilitychange", function() {
-    if (document.hidden) {
-      warningCount++;
-      // Сохраняем новое количество нарушений в память браузера
-      localStorage.setItem('test_warnings', warningCount);
-      
-      if (warningCount <= maxWarnings) {
-        alert("ВНИМАНИЕ! Вы покинули страницу теста. Это предупреждение № " + warningCount);
-      } else {
-        // Полностью стираем тест и блокируем экран
+  const now = new Date(); // Текущее время на устройстве студента
+
+  if (now < startTime) {
+    // Если тест еще не начался
+    document.addEventListener("DOMContentLoaded", function() {
+      document.body.innerHTML = "<h1 style='color:orange; text-align:center; margin-top:30vh; font-family:sans-serif;'>Тест еще не начался!<br><br>Он станет доступен: " + startTime.toLocaleString() + "</h1>";
+    });
+  } 
+  else if (now > endTime) {
+    // Если время теста уже вышло
+    document.addEventListener("DOMContentLoaded", function() {
+      document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:30vh; font-family:sans-serif;'>Время тестирования истекло!<br><br>Доступ к тесту закрыт.</h1>";
+    });
+  } 
+  else {
+    // === 2. ЕСЛИ ВРЕМЯ ПОДХОДИТ — ЗАПУСКАЕМ ТЕСТ И ЗАЩИТУ ===
+    let warningCount = parseInt(localStorage.getItem('test_warnings') || '0');
+    const maxWarnings = 1; // Лимит уходов со страницы
+
+    // Проверка при загрузке: не был ли тест заблокирован ранее за нарушения
+    if (warningCount > maxWarnings) {
+      document.addEventListener("DOMContentLoaded", function() {
         document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:30vh; font-family:sans-serif;'>Лимит нарушений исчерпан! Тест аннулирован.</h1>";
-      }
+      });
     }
-  });
-</script></body>
+
+    // Отслеживание ухода со страницы
+    document.addEventListener("visibilitychange", function() {
+      if (document.hidden) {
+        warningCount++;
+        localStorage.setItem('test_warnings', warningCount);
+        
+        if (warningCount <= maxWarnings) {
+          alert("ВНИМАНИЕ! Вы покинули страницу теста. Предупреждение № " + warningCount);
+        } else {
+          document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:30vh; font-family:sans-serif;'>Лимит нарушений исчерпан! Тест аннулирован.</h1>";
+        }
+      }
+    });
+  }
+</script>
+</body>
 </html>
