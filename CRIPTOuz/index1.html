@@ -167,12 +167,10 @@
     });
   }
 </script>
-	<!-- Кнопка сброса блокировки для преподавателя -->
-<div style="text-align:center; padding: 10px; background: #eee;">
-  <button onclick="localStorage.clear(); alert('Память очищена! Обновите страницу.'); location.reload();" 
-          style="padding: 5px 10px; font-size: 12px; background: #d9534f; color: white; border: none; border-radius: 4px;">
-    Сбросить тест / Очистить память
-  </button>
-</div>
+<!-- Кнопка сброса закреплена поверх экрана в правом верхнем углу -->
+<button onclick="localStorage.clear(); alert('Память очищена! Тест сброшен.'); location.reload();" 
+        style="position: fixed; top: 10px; right: 10px; z-index: 999999; padding: 8px 12px; font-size: 12px; background: #d9534f; color: white; border: none; border-radius: 6px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
+  🔄 Сбросить тест
+</button>
 </body>
 </html>
