@@ -111,5 +111,53 @@
 		})();
 	};
 </script>
+	<script>
+  // === 1. НАСТРОЙКА ВРЕМЕНИ ДОСТУПА ===
+  const startTime = new Date(2026, 10, 18, 9, 0);   // Дата и время начала теста
+  const endTime   = new Date(2026, 10, 19, 14, 50); // Дата и время окончания теста
+
+  const now = new Date(); // Текущее время на устройстве студента
+
+  if (now < startTime) {
+    document.addEventListener("DOMContentLoaded", function() {
+      document.body.innerHTML = "<h1 style='color:orange; text-align:center; margin-top:30vh; font-family:sans-serif;'>Test ele baslanbadı!<br><br>Korsetilgen waqittan son baslanadi: " + startTime.toLocaleString() + "</h1>";
+    });
+  } 
+  else if (now > endTime) {
+    document.addEventListener("DOMContentLoaded", function() {
+      document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:30vh; font-family:sans-serif;'>Test waqıtı juwmaqlandı!<br><br>Testke kiriw qadaǵan etilgen.</h1>";
+    });
+  } 
+  else {
+    // === 2. ЗАЩИТА И ЛИМИТ НАРУШЕНИЙ ===
+    let warningCount = parseInt(localStorage.getItem('test_warnings') || '0');
+    
+    // УСТАНАВЛИВАЕМ ЛИМИТ: ровно 2 предупреждения (на 3-й раз тест аннулируется)
+    const maxWarnings = 2; 
+
+    // Проверка при загрузке (если лимит уже был исчерпан ранее)
+    if (warningCount > maxWarnings) {
+      document.addEventListener("DOMContentLoaded", function() {
+        document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:30vh; font-family:sans-serif;'>Qaǵıyda buzıwlar shegarasına jetti! Test biykar etildi.</h1>";
+      });
+    }
+
+    // Отслеживание ухода со страницы
+    document.addEventListener("visibilitychange", function() {
+      if (document.hidden) {
+        warningCount++;
+        localStorage.setItem('test_warnings', warningCount);
+        
+        if (warningCount <= maxWarnings) {
+          // Пока количество нарушений меньше или равно 2, показываем предупреждение
+          alert("DÍQQAT! Siz test betinen shıqtıńız. Eskertiw № " + warningCount + " dan " + maxWarnings);
+        } else {
+          // На 3-й раз стираем тест и блокируем экран окончательно
+          document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:30vh; font-family:sans-serif;'>Qaǵıyda buzıwlar shegarasına jetti (3 marte)! Test biykar etildi.</h1>";
+        }
+      }
+    });
+  }
+</script>
 </body>
 </html>
