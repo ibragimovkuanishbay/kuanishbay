@@ -111,5 +111,53 @@
 		})();
 	};
 </script>
+	<script>
+  // === 1. НАСТРОЙКА ВРЕМЕНИ ДОСТУПА ===
+  // Месяцы считаются от 0 до 11 (0 = январь, 9 = октябрь, 10 = ноябрь, 11 = декабрь)
+  // Формат: new Date(Год, Месяц, День, Часы, Минуты)
+  const startTime = new Date(2026, 10, 19, 13, 30);   // Например: 19 ноября 2026 года в 13:30
+  const endTime   = new Date(2026, 10, 19, 14, 50); // Например: 19 ноября 2026 года в 14:50
+
+  const now = new Date(); // Текущее время на устройстве студента
+
+  if (now < startTime) {
+    // Если тест еще не начался
+    document.addEventListener("DOMContentLoaded", function() {
+      document.body.innerHTML = "<h1 style='color:orange; text-align:center; margin-top:30vh; font-family:sans-serif;'>Test ele baslanbadı!<br><br>Korsetilgem waqittan son ashiladi: " + startTime.toLocaleString() + "</h1>";
+    });
+  } 
+  else if (now > endTime) {
+    // Если время теста уже вышло
+    document.addEventListener("DOMContentLoaded", function() {
+      document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:30vh; font-family:sans-serif;'>Test waqıtı tamam boldı!<br><br>Testke kiriw qadaǵan etilgen.</h1>";
+    });
+  } 
+  else {
+    // === 2. ЕСЛИ ВРЕМЯ ПОДХОДИТ — ЗАПУСКАЕМ ТЕСТ И ЗАЩИТУ ===
+    let warningCount = parseInt(localStorage.getItem('test_warnings') || '0');
+    const maxWarnings = 1; // Лимит уходов со страницы
+
+    // Проверка при загрузке: не был ли тест заблокирован ранее за нарушения
+    if (warningCount > maxWarnings) {
+      document.addEventListener("DOMContentLoaded", function() {
+        document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:30vh; font-family:sans-serif;'>Qaǵıyda buzıwlar shegarasına jetti! Test biykar etildi.</h1>";
+      });
+    }
+
+    // Отслеживание ухода со страницы
+    document.addEventListener("visibilitychange", function() {
+      if (document.hidden) {
+        warningCount++;
+        localStorage.setItem('test_warnings', warningCount);
+        
+        if (warningCount <= maxWarnings) {
+          alert("DÍQQAT! Siz test betinen shıqtıńız. Eskertiw № " + warningCount);
+        } else {
+          document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:30vh; font-family:sans-serif;'>Qaǵıyda buzıwlar shegarasına jetti! Test biykar etildi.</h1>";
+        }
+      }
+    });
+  }
+</script>
 </body>
 </html>
