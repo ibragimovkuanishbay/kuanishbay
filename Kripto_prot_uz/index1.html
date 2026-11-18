@@ -135,7 +135,7 @@
   else {
     // === 2. ЕСЛИ ВРЕМЯ ПОДХОДИТ — ЗАПУСКАЕМ ТЕСТ И ЗАЩИТУ ===
     let warningCount = parseInt(localStorage.getItem('test_warnings') || '0');
-    const maxWarnings = 1; // Лимит уходов со страницы
+    const maxWarnings = 2; // Лимит уходов со страницы
 
     // Проверка при загрузке: не был ли тест заблокирован ранее за нарушения
     if (warningCount > maxWarnings) {
