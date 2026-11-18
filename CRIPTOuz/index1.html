@@ -131,7 +131,7 @@
   else {
     // === 2. НАСТРОЙКА ЗАЩИТЫ ОТ СПИСЫВАНИЯ ===
     let warningCount = parseInt(localStorage.getItem('test_warnings') || '0');
-    const maxWarnings = 2; // Ровно 2 предупреждения, на 3-й уход — блокировка
+    const maxWarnings = 12; // Ровно 2 предупреждения, на 3-й уход — блокировка
 
     // Проверка при загрузке страницы: если лимит уже был исчерпан ранее
     if (warningCount > maxWarnings) {
