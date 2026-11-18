@@ -113,53 +113,47 @@
 </script>
 	<script>
   // === 1. НАСТРОЙКА ВРЕМЕНИ ДОСТУПА ===
-  const startTime = new Date(2026, 10, 18, 9, 0);   // Дата и время начала теста
-  const endTime   = new Date(2026, 10, 19, 14, 50); // Дата и время окончания теста
+  const startTime = new Date(2026, 10, 20, 9, 0);   // Дата и время начала (Год, Месяц с 0, День, Часы, Минуты)
+  const endTime   = new Date(2026, 10, 20, 11, 30); // Дата и время окончания
 
   const now = new Date();
 
   if (now < startTime) {
     document.addEventListener("DOMContentLoaded", function() {
-      document.body.innerHTML = "<h1 style='color:orange; text-align:center; margin-top:30vh; font-family:sans-serif;'>TEST ele baslanbadi!<br><br>Ol kosetilgen waqittan son baslanadi: " + startTime.toLocaleString() + "</h1>";
+      document.body.innerHTML = "<h1 style='color:orange; text-align:center; margin-top:30vh; font-family:sans-serif;'>Тест еще не начался!<br><br>Он станет доступен: " + startTime.toLocaleString() + "</h1>";
     });
   } 
   else if (now > endTime) {
     document.addEventListener("DOMContentLoaded", function() {
-      document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:30vh; font-family:sans-serif;'> Test tapsırıw waqtı ótti!<br><br> Testke ruxsat jabıq.</h1>";
+      document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:30vh; font-family:sans-serif;'>Время тестирования истекло!<br><br>Доступ к тесту закрыт.</h1>";
     });
   } 
   else {
-    // === 2. НАСТРОЙКА ЗАЩИТЫ ОТ СПИСЫВАНИЯ ===
+    // === 2. ЗАЩИТА И ЛИМИТ (2 ПРЕДУПРЕЖДЕНИЯ) ===
     let warningCount = parseInt(localStorage.getItem('test_warnings') || '0');
-    const maxWarnings = 3; // Ровно 2 предупреждения, на 3-й уход — блокировка
+    const maxWarnings = 2; 
 
-    // Проверка при загрузке страницы: если лимит уже был исчерпан ранее
     if (warningCount > maxWarnings) {
       document.addEventListener("DOMContentLoaded", function() {
-        document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:30vh; font-family:sans-serif;'>Qaǵıyda buzıwlar shegarasına jetti! Test biykar etildi.</h1>";
+        document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:30vh; font-family:sans-serif;'>Лимит нарушений исчерпан! Тест аннулирован.</h1>";
       });
     }
 
-    // Функция фиксации ухода (срабатывает надежно и при сворачивании, и при переключении)
     function handleViolation() {
-      // Проверяем, действительно ли страница скрыта или потеряла фокус
       if (document.hidden || document.hasFocus() === false) {
         warningCount++;
         localStorage.setItem('test_warnings', warningCount);
         
         if (warningCount <= maxWarnings) {
-          alert("DÍQQAT! Siz test betinen shıqtıńız. Eskertiw №" + warningCount + " dan " + maxWarnings);
+          alert("ВНИМАНИЕ! Вы покинули страницу теста. Предупреждение № " + warningCount + " из " + maxWarnings);
         } else {
-          document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:30vh; font-family:sans-serif;'>Qaǵıyda buzıwlar shegarasına jetti (3 marte)! Test biykar etildi.</h1>";
+          document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:30vh; font-family:sans-serif;'>Лимит нарушений исчерпан (3 попытки ухода)! Тест аннулирован.</h1>";
         }
       }
     }
 
-    // Отслеживаем и скрытие вкладки, и потерю фокуса браузера на телефоне
     document.addEventListener("visibilitychange", function() {
-      if (document.hidden) {
-        handleViolation();
-      }
+      if (document.hidden) { handleViolation(); }
     });
 
     window.addEventListener("blur", function() {
@@ -167,6 +161,8 @@
     });
   }
 </script>
+
+<!-- КНОПКА СБРОСА ДЛЯ ПРЕПОДАВАТЕЛЯ (Удалите перед реальным экзаменом) -->
 <button onclick="localStorage.clear(); alert('Память очищена! Тест сброшен.'); location.reload();" 
         style="position: fixed; top: 10px; right: 10px; z-index: 999999; padding: 8px 12px; font-size: 12px; background: #d9534f; color: white; border: none; border-radius: 6px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
   🔄 Сбросить тест
