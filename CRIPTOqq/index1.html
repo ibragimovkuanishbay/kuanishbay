@@ -118,7 +118,7 @@
     const endTime   = new Date(2026, 10, 19, 16, 30);
     const now = new Date();
 
-    const maxWarnings = 3;
+    const maxWarnings = 2;
     const storageKey = "ispring_kripto_prot_warnings_v1";
     let warningCount = parseInt(localStorage.getItem(storageKey) || "0", 10);
     if (Number.isNaN(warningCount)) warningCount = 0;
