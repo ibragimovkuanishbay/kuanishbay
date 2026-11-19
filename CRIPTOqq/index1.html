@@ -111,5 +111,75 @@
 		})();
 	};
 </script>
+	 // === 1. НАСТРОЙКА ВРЕМЕНИ ДОСТУПА ===
+  // Месяцы считаются от 0 (0 = январь, 10 = ноябрь)
+  const startTime = new Date(2026, 10, 18, 0, 0);   // Начало: 18 ноября 2026, 00:00
+  const endTime   = new Date(2026, 10, 25, 23, 59); // Конец: 25 ноября 2026, 23:59
+
+  const now = new Date();
+
+  if (now < startTime) {
+    document.addEventListener("DOMContentLoaded", function() {
+      document.body.innerHTML = "<h1 style='color:orange; text-align:center; margin-top:30vh; font-family:sans-serif;'>Тест еще не начался!<br><br>Он станет доступен: " + startTime.toLocaleString() + "</h1>";
+    });
+  } 
+  else if (now > endTime) {
+    document.addEventListener("DOMContentLoaded", function() {
+      document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:30vh; font-family:sans-serif;'>Время тестирования истекло!<br><br>Доступ к тесту закрыт.</h1>";
+    });
+  } 
+  else {
+    // === 2. ЗАЩИТА ОТ СПИСЫВАНИЯ (БЕЗ ДВОЙНОГО СРАБАТЫВАНИЯ) ===
+    let warningCount = parseInt(localStorage.getItem('test_warnings') || '0');
+    const maxWarnings = 2; // Максимум 2 предупреждения, на 3-й уход — блокировка
+    let isAlertOpen = false; // Флаг, чтобы не считать нажатие ОК как новый выход
+    let lastViolationTime = 0; // Защита от одновременного срабатывания blur и visibilitychange
+
+    // Проверка при загрузке страницы
+    if (warningCount > maxWarnings) {
+      document.addEventListener("DOMContentLoaded", function() {
+        document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:30vh; font-family:sans-serif;'>Лимит нарушений исчерпан! Тест аннулирован.</h1>";
+      });
+    }
+
+    function handleViolation() {
+      const currentTime = Date.now();
+      
+      // Игнорируем, если окно предупреждения уже открыто или прошло меньше 1.5 секунд с прошлого фикса
+      if (isAlertOpen || (currentTime - lastViolationTime < 1500)) {
+        return;
+      }
+
+      if (document.hidden || document.hasFocus() === false) {
+        lastViolationTime = currentTime;
+        warningCount++;
+        localStorage.setItem('test_warnings', warningCount);
+
+        if (warningCount <= maxWarnings) {
+          isAlertOpen = true;
+          // Небольшая задержка перед показом alert, чтобы браузер корректно обработал возврат
+          setTimeout(function() {
+            alert("ВНИМАНИЕ! Вы покинули страницу теста. Предупреждение № " + warningCount + " из " + maxWarnings);
+            // Снимаем блокировку через полсекунды после закрытия alert
+            setTimeout(function() {
+              isAlertOpen = false;
+              lastViolationTime = Date.now();
+            }, 500);
+          }, 100);
+        } else {
+          document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:30vh; font-family:sans-serif;'>Лимит нарушений исчерпан (3 попытки ухода)! Тест аннулирован.</h1>";
+        }
+      }
+    }
+
+    document.addEventListener("visibilitychange", function() {
+      if (document.hidden) { handleViolation(); }
+    });
+
+    window.addEventListener("blur", function() {
+      handleViolation();
+    });
+  }
+</script>
 </body>
 </html>
