@@ -111,5 +111,100 @@
 		})();
 	};
 </script>
+	<script>
+  (function () {
+    // 1. Настройка интервала доступа (месяцы от 0 до 11: 10 = ноябрь)
+    const startTime = new Date(2026, 10, 19, 11, 0);
+    const endTime   = new Date(2026, 10, 19, 13, 0);
+    const now = new Date();
+
+    const maxWarnings = 2;
+    const storageKey = "ispring_kripto_prot_warnings_v1";
+    let warningCount = parseInt(localStorage.getItem(storageKey) || "0", 10);
+    if (Number.isNaN(warningCount)) warningCount = 0;
+
+    let isAlertOpen = false;
+    let lastViolationTime = 0;
+
+    function blockScreen(htmlMessage) {
+      const render = function () {
+        document.body.innerHTML =
+          "<div style='color:#fff;background:#1f2428;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:sans-serif;box-sizing:border-box;'>" +
+          "<div style='max-width:560px;line-height:1.5;'>" + htmlMessage + "</div></div>";
+      };
+      if (document.body) {
+        render();
+      } else {
+        document.addEventListener("DOMContentLoaded", render);
+      }
+    }
+
+    if (now < startTime) {
+      blockScreen(
+        "<h2 style='color:#ffb74d;margin-top:0;'>Тестирование еще не началось</h2>" +
+        "<p>Доступ откроется: <b>" + startTime.toLocaleString() + "</b></p>"
+      );
+      return;
+    }
+
+    if (now > endTime) {
+      blockScreen(
+        "<h2 style='color:#ff6b6b;margin-top:0;'>Время тестирования завершено</h2>" +
+        "<p>Окно сдачи закрыто: <b>" + endTime.toLocaleString() + "</b></p>"
+      );
+      return;
+    }
+
+    if (warningCount > maxWarnings) {
+      blockScreen(
+        "<h2 style='color:#ff6b6b;margin-top:0;'>Доступ заблокирован</h2>" +
+        "<p>Превышен допустимый лимит выходов со страницы теста.</p>"
+      );
+      return;
+    }
+
+    function handleViolation() {
+      const currentTime = Date.now();
+      if (isAlertOpen || (currentTime - lastViolationTime < 1500)) {
+        return;
+      }
+
+      if (document.hidden || document.hasFocus() === false) {
+        lastViolationTime = currentTime;
+        warningCount += 1;
+        localStorage.setItem(storageKey, String(warningCount));
+
+        if (warningCount <= maxWarnings) {
+          isAlertOpen = true;
+          setTimeout(function () {
+            alert(
+              "Внимание! Зафиксирован выход со страницы теста. " +
+              "Предупреждение " + warningCount + " из " + maxWarnings + "."
+            );
+            setTimeout(function () {
+              isAlertOpen = false;
+              lastViolationTime = Date.now();
+            }, 500);
+          }, 100);
+        } else {
+          blockScreen(
+            "<h2 style='color:#ff6b6b;margin-top:0;'>Тест аннулирован</h2>" +
+            "<p>Превышен лимит предупреждений (" + maxWarnings + "). Повторный запуск заблокирован.</p>"
+          );
+        }
+      }
+    }
+
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) {
+        handleViolation();
+      }
+    });
+
+    window.addEventListener("blur", function () {
+      handleViolation();
+    });
+  })();
+</script>
 </body>
 </html>
